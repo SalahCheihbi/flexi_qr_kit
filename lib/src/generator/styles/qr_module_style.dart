@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../renderers/modules/qr_module_renderer.dart';
+import 'qr_corner_mode.dart';
 import 'qr_module_shape.dart';
 
 /// Visual configuration of dark modules.
@@ -22,6 +23,7 @@ class QrModuleStyle {
     this.spacing = 0,
     this.rotation = 0,
     this.renderer,
+    this.cornerMode = QrCornerMode.manual,
   }) : assert(opacity >= 0 && opacity <= 1, 'opacity must be in [0, 1]'),
        assert(scale > 0 && scale <= 1, 'scale must be in (0, 1]'),
        assert(spacing >= 0, 'spacing must be >= 0');
@@ -59,6 +61,19 @@ class QrModuleStyle {
   /// Custom renderer that replaces [shape].
   final QrModuleRenderer? renderer;
 
+  /// Whether corners follow [borderRadius] as-is or adapt to neighbors.
+  ///
+  /// Applies to [QrModuleShape.rounded], [QrModuleShape.custom] and custom
+  /// [renderer]s that read `QrModuleGeometry.borderRadius`.
+  /// [QrModuleShape.connected] and [QrModuleShape.smooth] are always smart.
+  final QrCornerMode cornerMode;
+
+  /// Whether corner radii are decided by the smart corner engine.
+  bool get usesSmartCorners =>
+      cornerMode == QrCornerMode.smart ||
+      shape == QrModuleShape.connected ||
+      shape == QrModuleShape.smooth;
+
   /// Returns a copy with the given fields replaced.
   QrModuleStyle copyWith({
     QrModuleShape? shape,
@@ -70,6 +85,7 @@ class QrModuleStyle {
     double? spacing,
     double? rotation,
     QrModuleRenderer? renderer,
+    QrCornerMode? cornerMode,
   }) {
     return QrModuleStyle(
       shape: shape ?? this.shape,
@@ -81,6 +97,7 @@ class QrModuleStyle {
       spacing: spacing ?? this.spacing,
       rotation: rotation ?? this.rotation,
       renderer: renderer ?? this.renderer,
+      cornerMode: cornerMode ?? this.cornerMode,
     );
   }
 
@@ -95,7 +112,8 @@ class QrModuleStyle {
       other.scale == scale &&
       other.spacing == spacing &&
       other.rotation == rotation &&
-      other.renderer == renderer;
+      other.renderer == renderer &&
+      other.cornerMode == cornerMode;
 
   @override
   int get hashCode => Object.hash(
@@ -108,6 +126,7 @@ class QrModuleStyle {
     spacing,
     rotation,
     renderer,
+    cornerMode,
   );
 
   @override

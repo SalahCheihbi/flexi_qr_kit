@@ -11,6 +11,7 @@ class QrModuleGeometry {
   const QrModuleGeometry({
     required this.cellRect,
     required this.rect,
+    required this.borderRadius,
     required this.context,
     required this.style,
   });
@@ -21,6 +22,11 @@ class QrModuleGeometry {
   /// The area the shape should fill: [cellRect] reduced by the style's
   /// spacing and scale.
   final Rect rect;
+
+  /// Corner radii to use for [rect], already resolved: the style's
+  /// `borderRadius` (or the shape's default), with smart-corner decisions
+  /// applied when the style uses them. Not yet clamped to [rect].
+  final BorderRadius borderRadius;
 
   /// Matrix information about the module.
   final QrModuleContext context;

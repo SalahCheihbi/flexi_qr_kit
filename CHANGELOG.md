@@ -10,7 +10,11 @@ Initial development version.
 - `QrDesign` with background color, quiet zone and per-module styling via `moduleBuilder`.
 - `QrModuleStyle` with independent per-corner radii (`BorderRadius.only`), color, opacity,
   gradient, scale, spacing and rotation.
-- Built-in module shapes: `square`, `rounded`, `dots`, `circle`, `diamond` and `custom`.
+- Built-in module shapes: `square`, `rounded`, `dots`, `circle`, `diamond`, `connected`, `smooth`
+  and `custom`.
+- `QrSmartCornerEngine`: neighbor-aware corner rounding (exposed corners rounded, joints sharp,
+  concave fillets for L-shaped junctions), replaceable via `QrDesign.smartCornerEngine`.
+- `QrCornerMode.manual` / `QrCornerMode.smart` on `QrModuleStyle`.
 - `QrModuleRenderer` contract for custom, path-based module shapes, plus reusable built-in
   renderers.
 - `QrMatrix`: immutable matrix that classifies every module (finder, separator, timing,

@@ -12,26 +12,17 @@ class SquareModuleRenderer extends QrModuleRenderer {
   Path buildPath(QrModuleGeometry geometry) => Path()..addRect(geometry.rect);
 }
 
-/// Rounded rectangle with four independent corner radii taken from
-/// `QrModuleStyle.borderRadius`.
-///
-/// When the style has no border radius, every corner uses
-/// [defaultRadiusFactor] times the module side.
+/// Rounded rectangle with four independent corner radii, taken from
+/// [QrModuleGeometry.borderRadius] (which already includes smart-corner
+/// decisions).
 class RoundedModuleRenderer extends QrModuleRenderer {
   /// Creates a rounded-rectangle renderer.
-  const RoundedModuleRenderer({this.defaultRadiusFactor = 0});
-
-  /// Fallback radius as a fraction of the module side, in [0, 0.5].
-  final double defaultRadiusFactor;
+  const RoundedModuleRenderer();
 
   @override
-  Path buildPath(QrModuleGeometry geometry) {
-    final rect = geometry.rect;
-    final radius =
-        geometry.style.borderRadius ??
-        BorderRadius.circular(rect.shortestSide * defaultRadiusFactor);
-    return Path()..addRRect(resolveModuleRRect(rect, radius));
-  }
+  Path buildPath(QrModuleGeometry geometry) =>
+      Path()
+        ..addRRect(resolveModuleRRect(geometry.rect, geometry.borderRadius));
 }
 
 /// Circle centered in the module rectangle.

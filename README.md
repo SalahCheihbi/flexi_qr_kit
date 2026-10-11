@@ -9,13 +9,16 @@ rounded corners and one sharp corner. It never changes the encoded data to get
 a visual effect.
 
 > **Status:** early development (`0.1.0`, unreleased). The generator and module
-> rendering are ready. Smart corners, finder styling, logos, validation, export
-> and the scanner are on the [roadmap](#roadmap).
+> rendering, including smart corners, are ready. Finder styling, logos,
+> validation, export and the scanner are on the [roadmap](#roadmap).
 
 ## Features
 
 - Independent corner radii per module (`BorderRadius.only`).
-- Built-in shapes: square, rounded, dots, circle, diamond and custom.
+- Built-in shapes: square, rounded, dots, circle, diamond, connected, smooth
+  and custom.
+- Smart corner engine: rounds only exposed corners so neighboring modules
+  merge without gaps, with optional concave fillets.
 - Color, opacity, gradients, scale, spacing and rotation.
 - Per-module styling through a callback, with full module metadata: position,
   type, dark/light state, the eight neighbors and protection status.
@@ -85,7 +88,7 @@ QrDesign(
 
 | Property       | Description                                              |
 | -------------- | -------------------------------------------------------- |
-| `shape`        | `square`, `rounded`, `dots`, `circle`, `diamond`, `custom` |
+| `shape`        | `square`, `rounded`, `dots`, `circle`, `diamond`, `connected`, `smooth`, `custom` |
 | `borderRadius` | Independent corner radii for `custom` and `rounded`      |
 | `color`        | Fill color                                               |
 | `gradient`     | Gradient spread across the whole code                    |
@@ -94,6 +97,59 @@ QrDesign(
 | `spacing`      | Gap in logical pixels removed from each module           |
 | `rotation`     | Rotation of each module around its center, in radians    |
 | `renderer`     | Custom `QrModuleRenderer` that replaces `shape`          |
+| `cornerMode`   | `manual` (radii as given) or `smart` (neighbor-aware)    |
+
+### Smart corners
+
+In smart mode, a corner is rounded only when both neighbors sharing it are
+light. Corners where modules touch stay sharp, so connected modules merge into
+one shape with no gaps.
+
+```dart
+// Continuous shapes: isolated modules become circles, runs get round ends.
+QrDesign(moduleStyle: QrModuleStyle(shape: QrModuleShape.connected))
+
+// Same, plus concave fillets inside L-shaped junctions for a fluid look.
+QrDesign(moduleStyle: QrModuleStyle(shape: QrModuleShape.smooth))
+
+// Your own per-corner radii, applied only where the corner is exposed.
+QrDesign(
+  moduleStyle: QrModuleStyle(
+    shape: QrModuleShape.custom,
+    cornerMode: QrCornerMode.smart,
+    borderRadius: BorderRadius.only(
+      topLeft: Radius.circular(6),
+      bottomRight: Radius.circular(6),
+    ),
+  ),
+)
+```
+
+Modules touching only diagonally are both rounded at that point rather than
+pinched together. Fillets are added only where both orthogonal neighbors and
+the diagonal between them are dark.
+
+To override smart decisions for specific modules, return a `manual` style
+from `moduleBuilder`. To change the rules for the whole code, subclass the
+engine:
+
+```dart
+class RoundTopOnly extends QrSmartCornerEngine {
+  const RoundTopOnly();
+
+  @override
+  Set<QrCorner> exposedCorners(QrNeighbors neighbors) => super
+      .exposedCorners(neighbors)
+      .intersection({QrCorner.topLeft, QrCorner.topRight});
+}
+
+QrDesign(
+  moduleStyle: QrModuleStyle(shape: QrModuleShape.connected),
+  smartCornerEngine: RoundTopOnly(),
+)
+```
+
+Custom renderers receive the resolved radii in `QrModuleGeometry.borderRadius`.
 
 ### Styling individual modules
 
@@ -181,7 +237,6 @@ Heavy styling can make a code hard to scan. Until the validation engine ships:
 
 ## Roadmap
 
-- Smart corner engine: neighbor-aware rounding, plus `smooth` and `connected` shapes.
 - Independent styling of the three finder patterns.
 - Logo support.
 - Readability validation: render, decode and compare.

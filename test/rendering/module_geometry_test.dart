@@ -236,6 +236,36 @@ void main() {
     });
   });
 
+  group('buildConcaveFillet', () {
+    for (final corner in QrCorner.values) {
+      test('fills only the outer sliver of the $corner corner', () {
+        final path = buildConcaveFillet(_cell, corner, 8);
+        final i = corner.index;
+        final probe = _cornerProbes(_cell)[i];
+        // Point inside the quarter circle (0.5r from the corner diagonally).
+        final inward = switch (corner) {
+          QrCorner.topLeft => const Offset(4, 4),
+          QrCorner.topRight => const Offset(16, 4),
+          QrCorner.bottomRight => const Offset(16, 16),
+          QrCorner.bottomLeft => const Offset(4, 16),
+        };
+        expect(path.contains(probe), isTrue, reason: 'corner sliver filled');
+        expect(path.contains(inward), isFalse, reason: 'arc is concave');
+        expect(path.contains(_cell.center), isFalse);
+        expect(_cell.inflate(1e-6).contains(path.getBounds().topLeft), isTrue);
+        expect(
+          _cell.inflate(1e-6).contains(path.getBounds().bottomRight),
+          isTrue,
+        );
+      });
+    }
+
+    test('clamps the radius to half the cell', () {
+      final b = buildConcaveFillet(_cell, QrCorner.topLeft, 999).getBounds();
+      expect(b.width, closeTo(10, 1e-6));
+    });
+  });
+
   group('rotation', () {
     test('rotates the shape around the cell center', () {
       final path = _build(const QrModuleStyle(rotation: math.pi / 4));

@@ -17,8 +17,40 @@ class StarRenderer extends QrModuleRenderer {
   }
 }
 
+class RoundTopOnly extends QrSmartCornerEngine {
+  const RoundTopOnly();
+
+  @override
+  Set<QrCorner> exposedCorners(QrNeighbors neighbors) => super
+      .exposedCorners(neighbors)
+      .intersection({QrCorner.topLeft, QrCorner.topRight});
+}
+
 /// Compiles the README / spec examples against the public API.
 void main() {
+  test('README smart corner snippets', () {
+    const smart = QrDesign(
+      moduleStyle: QrModuleStyle(
+        shape: QrModuleShape.custom,
+        cornerMode: QrCornerMode.smart,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(6),
+          bottomRight: Radius.circular(6),
+        ),
+      ),
+    );
+    expect(smart.moduleStyle.usesSmartCorners, isTrue);
+
+    const custom = QrDesign(
+      moduleStyle: QrModuleStyle(shape: QrModuleShape.connected),
+      smartCornerEngine: RoundTopOnly(),
+    );
+    expect(custom.smartCornerEngine.exposedCorners(const QrNeighbors()), {
+      QrCorner.topLeft,
+      QrCorner.topRight,
+    });
+  });
+
   test('README snippets compile and behave as documented', () {
     const gradient = QrDesign(
       moduleStyle: QrModuleStyle(

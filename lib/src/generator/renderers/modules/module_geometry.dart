@@ -3,7 +3,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/painting.dart';
 
+import '../../../core/models/qr_corner.dart';
 import '../../../core/models/qr_module_context.dart';
+import '../../smart_corners/qr_smart_corner_engine.dart';
 import '../../styles/qr_module_shape.dart';
 import '../../styles/qr_module_style.dart';
 import 'built_in_module_renderers.dart';
@@ -37,24 +39,49 @@ RRect resolveModuleRRect(Rect rect, BorderRadius radius) {
 /// Returns the renderer used for a built-in [shape].
 QrModuleRenderer builtInModuleRenderer(QrModuleShape shape) => switch (shape) {
   QrModuleShape.square => const SquareModuleRenderer(),
-  QrModuleShape.rounded => const RoundedModuleRenderer(
-    defaultRadiusFactor: 0.35,
-  ),
+  QrModuleShape.rounded ||
+  QrModuleShape.connected ||
+  QrModuleShape.smooth ||
+  QrModuleShape.custom => const RoundedModuleRenderer(),
   QrModuleShape.dots => const CircleModuleRenderer(diameterFactor: 0.8),
   QrModuleShape.circle => const CircleModuleRenderer(),
   QrModuleShape.diamond => const DiamondModuleRenderer(),
-  QrModuleShape.custom => const RoundedModuleRenderer(),
 };
 
+/// Corner radii a [shape] uses on [rect] when the style sets no
+/// `borderRadius`: 35% of the side for [QrModuleShape.rounded], 50% for
+/// [QrModuleShape.connected] and [QrModuleShape.smooth], sharp otherwise.
+BorderRadius defaultModuleRadius(QrModuleShape shape, Rect rect) {
+  final factor = switch (shape) {
+    QrModuleShape.rounded => 0.35,
+    QrModuleShape.connected || QrModuleShape.smooth => 0.5,
+    _ => 0.0,
+  };
+  return BorderRadius.circular(rect.shortestSide * factor);
+}
+
 /// Builds the final outline of one module in canvas coordinates: resolves
-/// its rectangle, delegates the shape to the style's renderer and applies
+/// its rectangle and corner radii (applying [engine] when the style uses
+/// smart corners), delegates the shape to the style's renderer and applies
 /// rotation around the cell center.
-Path buildModulePath(Rect cell, QrModuleContext context, QrModuleStyle style) {
+Path buildModulePath(
+  Rect cell,
+  QrModuleContext context,
+  QrModuleStyle style, {
+  QrSmartCornerEngine engine = const QrSmartCornerEngine(),
+}) {
+  final rect = resolveModuleRect(cell, style);
+  final base = style.borderRadius ?? defaultModuleRadius(style.shape, rect);
+  final radius = style.usesSmartCorners
+      ? engine.resolve(context.neighbors, base)
+      : base;
+
   final renderer = style.renderer ?? builtInModuleRenderer(style.shape);
   final path = renderer.buildPath(
     QrModuleGeometry(
       cellRect: cell,
-      rect: resolveModuleRect(cell, style),
+      rect: rect,
+      borderRadius: radius,
       context: context,
       style: style,
     ),
@@ -75,4 +102,27 @@ Float64List _rotationAround(Offset pivot, double angle) {
     0, 0, 1, 0, //
     tx, ty, 0, 1, //
   ]);
+}
+
+/// Concave fillet filling [corner] of a light [cell] with a quarter-circle
+/// cut-out of [radius], used to smooth the inside of L-shaped junctions.
+Path buildConcaveFillet(Rect cell, QrCorner corner, double radius) {
+  final r = radius.clamp(0.0, cell.shortestSide / 2);
+  // Corner point and the unit directions pointing into the cell.
+  final (Offset p, double dx, double dy) = switch (corner) {
+    QrCorner.topLeft => (cell.topLeft, 1, 1),
+    QrCorner.topRight => (cell.topRight, -1, 1),
+    QrCorner.bottomRight => (cell.bottomRight, -1, -1),
+    QrCorner.bottomLeft => (cell.bottomLeft, 1, -1),
+  };
+  final start = p.translate(dx * r, 0);
+  final end = p.translate(0, dy * r);
+  // The arc bulges towards the corner point; its direction depends on the
+  // orientation of the corner.
+  final clockwise = (dx * dy) < 0;
+  return Path()
+    ..moveTo(p.dx, p.dy)
+    ..lineTo(start.dx, start.dy)
+    ..arcToPoint(end, radius: Radius.circular(r), clockwise: clockwise)
+    ..close();
 }
