@@ -1,6 +1,6 @@
 name: flexi_qr_kit
 description: "Highly customizable QR code generator for Flutter with per-corner radius, smart corner rendering and independently styled finder patterns."
-version: 0.0.1
+version: 0.1.0
 homepage:
 
 environment:
