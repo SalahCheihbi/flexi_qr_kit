@@ -16,6 +16,17 @@ enum QrModuleShape {
   /// Square rotated 45 degrees, touching the middle of each edge.
   diamond,
 
+  /// Neighbor-aware rounded squares that merge into continuous shapes:
+  /// always uses smart corners. Defaults to a 50% radius, so isolated
+  /// modules become circles and runs end in half circles.
+  connected,
+
+  /// Like [connected], and also fills the inner corner of L-shaped
+  /// junctions with a concave fillet for a fluid look. Fillets are only
+  /// drawn when modules fill their whole cell (scale 1, no spacing, no
+  /// rotation).
+  smooth,
+
   /// Rectangle whose four corners come from `QrModuleStyle.borderRadius`,
   /// each set independently. Missing corners stay sharp.
   custom,
