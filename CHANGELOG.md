@@ -50,15 +50,17 @@ Initial release.
   `QrValidationMode.strict` (default) throws `QrValidationException` for invalid codes,
   `QrValidationMode.advanced` always exports.
 - `QrExporter.renderImage`, `renderQrImage`, `imageToRgba` and `resolveQrLogoImage` helpers.
-- `FlexiQrScanner`: camera QR scanner built on `mobile_scanner`, limited to the overlay's scan
+- `FlexiQrScanner`, in the separate `package:flexi_qr_kit/scanner.dart` library so the generator
+  keeps supporting every platform: camera QR scanner built on `mobile_scanner`, limited to the overlay's scan
   window by default, with duplicate suppression (`duplicateCooldown`), an optional
   `MobileScannerController`, `errorBuilder` and `placeholderBuilder`.
 - `QrScanResult` (value, raw bytes, corners, size) and `QrScanDeduplicator`.
 - `QrScannerOverlay` / `QrScannerOverlayPainter` with `QrScannerOverlayStyle` (window size and
   alignment, dim color) and `QrScannerFrameStyle` (color, stroke width, bracket length,
   independent corner radii, per-corner brackets, full border).
-- Re-exports `MobileScannerController`, `MobileScannerException`, `MobileScannerErrorCode`,
-  `BarcodeFormat`, `CameraFacing`, `DetectionSpeed` and `TorchState` from `mobile_scanner`.
+- `scanner.dart` re-exports `MobileScannerController`, `MobileScannerException`,
+  `MobileScannerErrorCode`, `BarcodeFormat`, `CameraFacing`, `DetectionSpeed` and `TorchState`
+  from `mobile_scanner`, and `QrCorner`.
 
 ### Fixed
 

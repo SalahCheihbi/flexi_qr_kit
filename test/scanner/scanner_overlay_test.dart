@@ -1,4 +1,4 @@
-import 'package:flexi_qr_kit/flexi_qr_kit.dart';
+import 'package:flexi_qr_kit/scanner.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

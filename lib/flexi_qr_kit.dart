@@ -1,16 +1,10 @@
 /// Fully customizable QR code generation for Flutter: independent corner
 /// radii per module, per-module styling and pluggable renderers.
+///
+/// The camera scanner is a separate library, so apps that only generate
+/// codes do not depend on the camera plugin's platforms:
+/// `import 'package:flexi_qr_kit/scanner.dart';`.
 library;
-
-export 'package:mobile_scanner/mobile_scanner.dart'
-    show
-        BarcodeFormat,
-        CameraFacing,
-        DetectionSpeed,
-        MobileScannerController,
-        MobileScannerErrorCode,
-        MobileScannerException,
-        TorchState;
 
 export 'src/core/exceptions/flexi_qr_exception.dart';
 export 'src/core/models/qr_corner.dart';
@@ -45,7 +39,3 @@ export 'src/generator/validation/qr_decoder.dart';
 export 'src/generator/validation/qr_validator.dart';
 export 'src/generator/widgets/flexi_qr_generator.dart';
 export 'src/generator/widgets/flexi_qr_painter.dart';
-export 'src/scanner/flexi_qr_scanner.dart';
-export 'src/scanner/qr_scan_result.dart';
-export 'src/scanner/qr_scanner_overlay.dart';
-export 'src/scanner/qr_scanner_overlay_style.dart';

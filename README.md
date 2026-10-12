@@ -145,6 +145,15 @@ dependencies:
 
 Requires Flutter 3.35 or later and Dart 3.9 or later.
 
+```dart
+import 'package:flexi_qr_kit/flexi_qr_kit.dart'; // generator, validation, export
+import 'package:flexi_qr_kit/scanner.dart';      // camera scanner
+```
+
+The generator works on every Flutter platform. The scanner is a separate
+library built on `mobile_scanner` and supports Android, iOS, macOS and web;
+apps that only generate codes never import it.
+
 ## Usage
 
 ### Basic QR code
@@ -533,6 +542,8 @@ Use `QrExporter.renderImage` to get a `ui.Image` instead of PNG bytes.
 ## Scanner
 
 ```dart
+import 'package:flexi_qr_kit/scanner.dart';
+
 FlexiQrScanner(
   onDetect: (result) => print(result.value),
   overlayStyle: const QrScannerOverlayStyle(
