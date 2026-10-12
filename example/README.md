@@ -21,9 +21,9 @@ The gallery entries live in `lib/showcases.dart`.
 fvm flutter run
 ```
 
-The scanner needs a camera. The camera permission is already set up for
-iOS and macOS (`NSCameraUsageDescription`, camera entitlement); on Android it
-comes from `mobile_scanner`.
+Runs on Android, iOS, web, Windows and Linux. The scanner needs a camera
+(Android, iOS and web). The camera permission is already set up for iOS
+(`NSCameraUsageDescription`); on Android it comes from `mobile_scanner`.
 
 ## Tests
 
