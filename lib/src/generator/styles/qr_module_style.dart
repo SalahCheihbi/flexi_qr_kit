@@ -41,8 +41,8 @@ class QrModuleStyle {
   /// Gradient spread across the whole QR area (not per module).
   final Gradient? gradient;
 
-  /// Independent corner radii for [QrModuleShape.custom] and
-  /// [QrModuleShape.rounded].
+  /// Independent corner radii for [QrModuleShape.square],
+  /// [QrModuleShape.custom] and [QrModuleShape.rounded].
   final BorderRadius? borderRadius;
 
   /// Fraction of the cell the module occupies, centered, in (0, 1].

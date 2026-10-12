@@ -1,3 +1,5 @@
+import '../models/qr_validation_result.dart';
+
 /// Base class for all exceptions thrown by `flexi_qr_kit`.
 sealed class FlexiQrException implements Exception {
   const FlexiQrException(this.message);
@@ -20,4 +22,17 @@ class QrEncodingException extends FlexiQrException {
 class QrDataTooLongException extends QrEncodingException {
   /// Creates a capacity exception.
   const QrDataTooLongException(super.message);
+}
+
+/// Thrown by strict-mode export when the rendered code fails validation.
+class QrValidationException extends FlexiQrException {
+  /// Creates a validation exception for [result].
+  QrValidationException(this.result)
+    : super(
+        'QR code failed validation: '
+        '${result.errors.map((e) => e.message).join('; ')}',
+      );
+
+  /// The failed validation, with every issue found.
+  final QrValidationResult result;
 }

@@ -26,8 +26,112 @@ class RoundTopOnly extends QrSmartCornerEngine {
       .intersection({QrCorner.topLeft, QrCorner.topRight});
 }
 
+class BadgeLogoRenderer extends QrLogoRenderer {
+  const BadgeLogoRenderer();
+
+  @override
+  void paint(Canvas canvas, QrLogoGeometry geometry) {
+    canvas.drawOval(
+      geometry.containerRect,
+      Paint()..color = const Color(0xFF3F51B5),
+    );
+  }
+}
+
+class DiamondEyeRenderer extends DefaultQrFinderRenderer {
+  const DiamondEyeRenderer();
+
+  @override
+  Path buildInner(QrFinderGeometry geometry) {
+    final r = geometry.innerRect;
+    return Path()
+      ..moveTo(r.center.dx, r.top)
+      ..lineTo(r.right, r.center.dy)
+      ..lineTo(r.center.dx, r.bottom)
+      ..lineTo(r.left, r.center.dy)
+      ..close();
+  }
+}
+
 /// Compiles the README / spec examples against the public API.
 void main() {
+  test('README finder and background snippets', () {
+    final presets = QrDesign(
+      finderStyle: QrFinderStyle.rounded(
+        outerRadius: const Radius.circular(12),
+        innerRadius: const Radius.circular(6),
+      ),
+      topRightFinderStyle: QrFinderStyle.circle(
+        innerColor: const Color(0xFFE91E63),
+      ),
+      bottomLeftFinderStyle: QrFinderStyle.square(),
+    );
+    expect(presets.finderStyleFor(QrFinderPosition.bottomLeft), isNotNull);
+    expect(
+      const QrFinderStyle(outerThickness: 1.6).effectiveOuterThickness,
+      1.2,
+    );
+    expect(
+      const QrFinderStyle(
+        outerThickness: 1.6,
+        safeMode: false,
+      ).effectiveOuterThickness,
+      1.6,
+    );
+
+    final design = QrDesign(
+      finderStyle: QrFinderStyle(
+        outer: QrFinderPartStyle(borderRadius: BorderRadius.circular(12)),
+        inner: QrFinderPartStyle(
+          color: const Color(0xFF3F51B5),
+          borderRadius: BorderRadius.circular(999),
+        ),
+      ),
+      topLeftFinderStyle: const QrFinderStyle(
+        outer: QrFinderPartStyle(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+        ),
+      ),
+      backgroundRenderer: FilledBackgroundRenderer(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF3E0), Color(0xFFFFFFFF)],
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+    );
+    expect(
+      design.finderStyleFor(QrFinderPosition.topLeft),
+      design.topLeftFinderStyle,
+    );
+    expect(
+      design.finderStyleFor(QrFinderPosition.bottomLeft),
+      design.finderStyle,
+    );
+    const custom = QrDesign(
+      finderStyle: QrFinderStyle(renderer: DiamondEyeRenderer()),
+    );
+    expect(custom.finderStyle!.renderer, isA<DiamondEyeRenderer>());
+  });
+
+  test('README logo snippets', () {
+    final generator = FlexiQrGenerator(
+      data: 'https://example.com',
+      design: QrDesign(
+        logo: QrLogo(
+          image: const AssetImage('assets/logo.png'),
+          sizeFactor: 0.25,
+          padding: 6,
+          borderRadius: BorderRadius.circular(999),
+          renderer: const BadgeLogoRenderer(),
+        ),
+      ),
+    );
+    expect(generator.design.logo!.sizeFactor, 0.25);
+  });
+
   test('README smart corner snippets', () {
     const smart = QrDesign(
       moduleStyle: QrModuleStyle(
@@ -49,6 +153,36 @@ void main() {
       QrCorner.topLeft,
       QrCorner.topRight,
     });
+  });
+
+  test('README validation and export snippets', () async {
+    const design = QrDesign();
+    final result = await const QrValidator().validate(
+      'https://example.com',
+      design: design,
+      size: 300,
+    );
+    expect(result.status, QrValidationStatus.valid);
+    expect(result.decodedText, 'https://example.com');
+
+    final export = await const QrExporter().exportPng(
+      'https://example.com',
+      design: design,
+      size: 300,
+      pixelRatio: 4,
+    );
+    expect(export.width, 1200);
+    expect(export.validation.isUsable, isTrue);
+
+    await expectLater(
+      const QrExporter().exportPng(
+        'https://example.com',
+        design: const QrDesign(
+          moduleStyle: QrModuleStyle(color: Color(0xFFEEEEEE)),
+        ),
+      ),
+      throwsA(isA<QrValidationException>()),
+    );
   });
 
   test('README snippets compile and behave as documented', () {

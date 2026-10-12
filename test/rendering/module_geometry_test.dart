@@ -172,6 +172,33 @@ void main() {
       }
     });
 
+    test('square honors borderRadius when given (default shape)', () {
+      // Regression: a borderRadius set without a shape must not be ignored.
+      final path = _build(
+        const QrModuleStyle(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(8),
+            topRight: Radius.circular(8),
+            bottomRight: Radius.circular(8),
+          ),
+        ),
+      );
+      final p = _cornerProbes(_cell);
+      expect(path.contains(p[0]), isFalse);
+      expect(path.contains(p[1]), isFalse);
+      expect(path.contains(p[2]), isFalse);
+      expect(path.contains(p[3]), isTrue);
+    });
+
+    test('larger radii keep changing the shape up to half the module', () {
+      bool roundedAt(double radius, Offset probe) => !_build(
+        QrModuleStyle(borderRadius: BorderRadius.circular(radius)),
+      ).contains(probe);
+      // (2, 2) is outside a radius-8 corner but inside a radius-4 corner.
+      expect(roundedAt(4, const Offset(2, 2)), isFalse);
+      expect(roundedAt(8, const Offset(2, 2)), isTrue);
+    });
+
     test('rounded rounds all four corners by default', () {
       final path = _build(const QrModuleStyle(shape: QrModuleShape.rounded));
       expect(path.contains(_cell.center), isTrue);

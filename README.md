@@ -8,9 +8,10 @@ you set each of the four corners of a module independently: for example, three
 rounded corners and one sharp corner. It never changes the encoded data to get
 a visual effect.
 
-> **Status:** early development (`0.1.0`, unreleased). The generator and module
-> rendering, including smart corners, are ready. Finder styling, logos,
-> validation, export and the scanner are on the [roadmap](#roadmap).
+> **Status:** early development (`0.1.0`, unreleased). The generator, module
+> rendering (smart corners, finder styling, backgrounds, center logo),
+> readability validation and PNG export are ready. The scanner is on the
+> [roadmap](#roadmap).
 
 ## Features
 
@@ -20,6 +21,13 @@ a visual effect.
 - Smart corner engine: rounds only exposed corners so neighboring modules
   merge without gaps, with optional concave fillets.
 - Color, opacity, gradients, scale, spacing and rotation.
+- Independent styling of each finder pattern: frame, eye and separator, each
+  with its own color, gradient and corner radii.
+- Custom backgrounds: rounded, gradient or fully custom.
+- Center logo with a configurable container that is kept clear of the finders.
+- Readability validation: renders the code, decodes it with an independent
+  decoder (ZXing) and checks quiet zone, contrast, logo coverage and module size.
+- PNG export through the same pipeline as the preview, validated before export.
 - Per-module styling through a callback, with full module metadata: position,
   type, dark/light state, the eight neighbors and protection status.
 - Pluggable `QrModuleRenderer` for your own path-based shapes.
@@ -206,6 +214,143 @@ A renderer only describes shape. The pipeline applies color, opacity, gradient
 and rotation, and merges modules that share a style into a single fill so
 touching modules have no visible seams.
 
+### Finder patterns
+
+Finders are drawn as whole shapes instead of 49 separate modules. Each one has
+three parts: the 7x7 `outer` frame, the 3x3 `inner` eye and an optional light
+`separator` band around it. Every part has its own color, gradient and four
+independent corner radii.
+
+```dart
+QrDesign(
+  // Applies to all three finders...
+  finderStyle: QrFinderStyle(
+    outer: QrFinderPartStyle(borderRadius: BorderRadius.circular(12)),
+    inner: QrFinderPartStyle(
+      color: Color(0xFF3F51B5),
+      borderRadius: BorderRadius.circular(999),
+    ),
+  ),
+  // ...unless a position has its own style.
+  topLeftFinderStyle: QrFinderStyle(
+    outer: QrFinderPartStyle(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20),
+        bottomRight: Radius.circular(20),
+      ),
+    ),
+  ),
+)
+```
+
+Without a finder style, finders keep the module style. The frame's inner hole
+follows the outer corners, so rounded frames keep an even thickness. Keep the
+separator light: scanners need contrast around each finder.
+
+Presets cover the common looks:
+
+```dart
+QrDesign(
+  finderStyle: QrFinderStyle.rounded(
+    outerRadius: Radius.circular(12),
+    innerRadius: Radius.circular(6),
+  ),
+  topRightFinderStyle: QrFinderStyle.circle(innerColor: Color(0xFFE91E63)),
+  bottomLeftFinderStyle: QrFinderStyle.square(),
+)
+```
+
+`outerThickness` sets the frame thickness in modules (the standard is 1). The
+3x3 eye never moves, so a thicker frame narrows the gap around it. Scanners
+locate finders by their 1:1:3:1:1 proportions, so `safeMode` (on by default)
+keeps the thickness between 0.8 and 1.2 modules. Set `safeMode: false` to go
+beyond that range, and check the result on real devices:
+
+```dart
+QrFinderStyle(outerThickness: 1.2) // applied as-is
+QrFinderStyle(outerThickness: 1.6) // safe mode: drawn at 1.2
+QrFinderStyle(outerThickness: 1.6, safeMode: false) // drawn at 1.6
+```
+
+To change the geometry, extend `DefaultQrFinderRenderer` and override
+`buildOuter`, `buildInner` or `buildSeparator`:
+
+```dart
+class DiamondEyeRenderer extends DefaultQrFinderRenderer {
+  const DiamondEyeRenderer();
+
+  @override
+  Path buildInner(QrFinderGeometry geometry) {
+    final r = geometry.innerRect;
+    return Path()
+      ..moveTo(r.center.dx, r.top)
+      ..lineTo(r.right, r.center.dy)
+      ..lineTo(r.center.dx, r.bottom)
+      ..lineTo(r.left, r.center.dy)
+      ..close();
+  }
+}
+
+QrDesign(finderStyle: QrFinderStyle(renderer: DiamondEyeRenderer()))
+```
+
+### Background
+
+```dart
+QrDesign(
+  backgroundRenderer: FilledBackgroundRenderer(
+    gradient: LinearGradient(colors: [Color(0xFFFFF3E0), Color(0xFFFFFFFF)]),
+    borderRadius: BorderRadius.circular(24),
+  ),
+)
+```
+
+A `backgroundRenderer` replaces `backgroundColor`. Set `coverQuietZone: false`
+to fill only behind the modules. Implement `QrBackgroundRenderer` to paint
+anything else; it receives the `QrRenderLayout` and is drawn first.
+
+### Center logo
+
+```dart
+FlexiQrGenerator(
+  data: 'https://example.com',
+  design: QrDesign(
+    logo: QrLogo(
+      image: AssetImage('assets/logo.png'),
+      sizeFactor: 0.25, // fraction of the code width, max 0.4
+      padding: 6,
+      borderRadius: BorderRadius.circular(999), // circular container
+    ),
+  ),
+)
+```
+
+The logo container snaps to whole modules, stays centered and never reaches
+the three finder patterns. Data modules underneath are removed, but
+alignment, timing and other protected modules are always kept. The container
+uses `QrDesign.backgroundColor` unless you set `backgroundColor`, and its four
+corner radii are independent. With a logo, the generator defaults to error
+correction level H.
+
+High error correction does not guarantee that a code with a logo will scan.
+Keep logos at about 30% of the width or less, and test on real devices.
+
+Implement `QrLogoRenderer` to draw the logo yourself:
+
+```dart
+class BadgeLogoRenderer extends QrLogoRenderer {
+  const BadgeLogoRenderer();
+
+  @override
+  void paint(Canvas canvas, QrLogoGeometry geometry) {
+    canvas.drawOval(
+      geometry.containerRect,
+      Paint()..color = const Color(0xFF3F51B5),
+    );
+  }
+}
+```
+
 ### Encoding options
 
 ```dart
@@ -226,21 +371,66 @@ matrix.typeAt(0, 0);      // QrModuleType.finder
 matrix.moduleAt(10, 12);  // QrModuleContext snapshot
 ```
 
-## Readability
+## Validation
 
-Heavy styling can make a code hard to scan. Until the validation engine ships:
+Heavy styling can make a code hard to scan. `QrValidator` renders the code,
+decodes the pixels with an independent decoder (a Dart port of ZXing) and
+compares the result with the input. It also checks the design itself: quiet
+zone, contrast, inverted colors, logo coverage versus error correction,
+module pixel size, finder geometry, small scale and rotation.
 
-- Keep the default 4-module quiet zone.
-- Keep strong contrast between modules and background.
-- Avoid very small `scale` values together with low error correction.
-- Test your designs on real Android and iOS devices.
+```dart
+final result = await const QrValidator().validate(
+  'https://example.com',
+  design: design,
+  size: 300,
+);
+
+switch (result.status) {
+  case QrValidationStatus.valid:   // decoded, no risk found
+  case QrValidationStatus.warning: // decoded, but see result.warnings
+  case QrValidationStatus.invalid: // see result.errors
+}
+for (final issue in result.issues) {
+  print('${issue.code}: ${issue.message}');
+}
+```
+
+Pass `decode: false` for a fast configuration-only check, for example while a
+slider is being dragged. Implement `QrDecoder` to validate with another
+decoder.
+
+A valid result is strong evidence, not a guarantee: one decoder reading a
+perfect digital image is easier than a phone camera reading a print. Always
+test important codes on real Android and iOS devices.
+
+## Export
+
+```dart
+final export = await const QrExporter().exportPng(
+  'https://example.com',
+  design: design,
+  size: 300,      // logical pixels, like the widget
+  pixelRatio: 4,  // 1200 x 1200 PNG for print
+);
+await File('qr.png').writeAsBytes(export.bytes);
+export.validation; // validation of the exported pixels
+```
+
+Export uses the same `QrRenderPipeline` as `FlexiQrGenerator`, so the PNG
+matches the preview. `pixelRatio` scales radii and spacing like a high-DPI
+screen. Set `transparentBackground: true` to drop `backgroundColor`. A logo is
+loaded from `QrLogo.image`, or pass an already decoded `logoImage`.
+
+Every export decodes its own pixels. In `QrValidationMode.strict` (the
+default), an invalid code throws `QrValidationException` instead of being
+exported; its `result` lists the issues. `QrValidationMode.advanced` always
+exports and reports the issues in `export.validation`.
+
+Use `QrExporter.renderImage` to get a `ui.Image` instead of PNG bytes.
 
 ## Roadmap
 
-- Independent styling of the three finder patterns.
-- Logo support.
-- Readability validation: render, decode and compare.
-- PNG export.
 - Customizable scanner based on `mobile_scanner`.
 - Example application.
 

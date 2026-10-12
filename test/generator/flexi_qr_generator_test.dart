@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flexi_qr_kit/flexi_qr_kit.dart';
 import 'package:flutter/material.dart';
@@ -170,6 +171,115 @@ void main() {
       );
       expect(find.bySemanticsLabel('Website QR'), findsOneWidget);
       handle.dispose();
+    });
+  });
+
+  group('FlexiQrGenerator logo', () {
+    Future<Uint8List> pngBytes() async {
+      final recorder = ui.PictureRecorder();
+      Canvas(recorder).drawRect(
+        const Rect.fromLTWH(0, 0, 4, 4),
+        Paint()..color = const Color(0xFFFF0000),
+      );
+      final image = await recorder.endRecording().toImage(4, 4);
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      return data!.buffer.asUint8List();
+    }
+
+    testWidgets('defaults to high error correction with a logo', (
+      tester,
+    ) async {
+      final bytes = (await tester.runAsync(pngBytes))!;
+      await tester.pumpWidget(
+        _app(
+          FlexiQrGenerator(
+            data: 'a',
+            size: 100,
+            design: QrDesign(logo: QrLogo(image: MemoryImage(bytes))),
+          ),
+        ),
+      );
+      expect(
+        _painter(tester).matrix.errorCorrectionLevel,
+        QrErrorCorrectionLevel.high,
+      );
+    });
+
+    testWidgets('explicit error correction wins over the logo default', (
+      tester,
+    ) async {
+      final bytes = (await tester.runAsync(pngBytes))!;
+      await tester.pumpWidget(
+        _app(
+          FlexiQrGenerator(
+            data: 'a',
+            size: 100,
+            errorCorrectionLevel: QrErrorCorrectionLevel.quartile,
+            design: QrDesign(logo: QrLogo(image: MemoryImage(bytes))),
+          ),
+        ),
+      );
+      expect(
+        _painter(tester).matrix.errorCorrectionLevel,
+        QrErrorCorrectionLevel.quartile,
+      );
+    });
+
+    testWidgets('without a logo the default stays medium', (tester) async {
+      await tester.pumpWidget(
+        _app(const FlexiQrGenerator(data: 'a', size: 100)),
+      );
+      expect(
+        _painter(tester).matrix.errorCorrectionLevel,
+        QrErrorCorrectionLevel.medium,
+      );
+    });
+
+    testWidgets('loads the logo image and hands it to the painter', (
+      tester,
+    ) async {
+      final bytes = (await tester.runAsync(pngBytes))!;
+      final provider = MemoryImage(bytes);
+      await tester.pumpWidget(
+        _app(
+          FlexiQrGenerator(
+            data: 'a',
+            size: 100,
+            design: QrDesign(logo: QrLogo(image: provider)),
+          ),
+        ),
+      );
+      expect(_painter(tester).logoImage, isNull, reason: 'still decoding');
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 200)),
+      );
+      await tester.pump();
+      final image = _painter(tester).logoImage;
+      expect(image, isNotNull);
+      expect(image!.width, 4);
+    });
+
+    testWidgets('drops the logo image when the logo is removed', (
+      tester,
+    ) async {
+      final bytes = (await tester.runAsync(pngBytes))!;
+      await tester.pumpWidget(
+        _app(
+          FlexiQrGenerator(
+            data: 'a',
+            size: 100,
+            design: QrDesign(logo: QrLogo(image: MemoryImage(bytes))),
+          ),
+        ),
+      );
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 200)),
+      );
+      await tester.pump();
+      await tester.pumpWidget(
+        _app(const FlexiQrGenerator(data: 'a', size: 100)),
+      );
+      expect(_painter(tester).logoImage, isNull);
     });
   });
 

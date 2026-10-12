@@ -52,7 +52,8 @@ Future<_Raster> _render(QrMatrix m, QrDesign design) async {
   final recorder = ui.PictureRecorder();
   QrRenderPipeline(
     matrix: m,
-    design: design.copyWith(quietZone: 0),
+    // Synthetic grids put modules where finders normally are.
+    design: design.copyWith(quietZone: 0, styleFindersAsModules: true),
   ).paint(Canvas(recorder), const Size.square(210));
   final image = await recorder.endRecording().toImage(210, 210);
   final bytes = await image.toByteData();

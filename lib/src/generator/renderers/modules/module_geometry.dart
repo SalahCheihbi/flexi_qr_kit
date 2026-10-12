@@ -76,7 +76,12 @@ Path buildModulePath(
       ? engine.resolve(context.neighbors, base)
       : base;
 
-  final renderer = style.renderer ?? builtInModuleRenderer(style.shape);
+  // An explicit borderRadius on the default square shape is honored.
+  final renderer =
+      style.renderer ??
+      (style.shape == QrModuleShape.square && style.borderRadius != null
+          ? const RoundedModuleRenderer()
+          : builtInModuleRenderer(style.shape));
   final path = renderer.buildPath(
     QrModuleGeometry(
       cellRect: cell,

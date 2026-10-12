@@ -1,6 +1,8 @@
 /// Built-in outline used to draw a dark module.
 enum QrModuleShape {
-  /// Plain square filling the module rectangle.
+  /// Square filling the module rectangle. Sharp, unless
+  /// `QrModuleStyle.borderRadius` is set, in which case those corner radii
+  /// are applied (same as [custom]).
   square,
 
   /// Square with rounded corners. Uses `QrModuleStyle.borderRadius` when

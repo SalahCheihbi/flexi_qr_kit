@@ -93,7 +93,9 @@ void main() {
     });
 
     test('mixed corners render: three rounded, bottom-left sharp', () async {
+      // Probes module (0,0), so finders are drawn as modules here.
       const design = QrDesign(
+        styleFindersAsModules: true,
         moduleStyle: QrModuleStyle(
           shape: QrModuleShape.custom,
           borderRadius: BorderRadius.only(
@@ -157,6 +159,7 @@ void main() {
     test('moduleBuilder is only called for dark modules', () {
       final seen = <QrModuleContext>[];
       final design = QrDesign(
+        styleFindersAsModules: true,
         moduleBuilder: (module) {
           seen.add(module);
           return null;

@@ -36,7 +36,7 @@ class FlexiQrGenerator extends StatefulWidget {
     super.key,
     required this.data,
     this.design = const QrDesign(),
-    this.errorCorrectionLevel = QrErrorCorrectionLevel.medium,
+    this.errorCorrectionLevel,
     this.version,
     this.size,
     this.encoder = const QrPackageEncoder(),
@@ -50,8 +50,9 @@ class FlexiQrGenerator extends StatefulWidget {
   /// Visual configuration.
   final QrDesign design;
 
-  /// Error correction level.
-  final QrErrorCorrectionLevel errorCorrectionLevel;
+  /// Error correction level. When null, uses [QrErrorCorrectionLevel.high]
+  /// if the design has a logo and [QrErrorCorrectionLevel.medium] otherwise.
+  final QrErrorCorrectionLevel? errorCorrectionLevel;
 
   /// Fixed QR version (1 to 40), or `null` for the smallest that fits.
   final int? version;
@@ -81,6 +82,13 @@ class _FlexiQrGeneratorState extends State<FlexiQrGenerator> {
   Object? _error;
   StackTrace? _stackTrace;
 
+  ImageStream? _logoStream;
+  ImageStreamListener? _logoListener;
+  ImageInfo? _logoInfo;
+
+  static QrErrorCorrectionLevel _levelOf(FlexiQrGenerator w) =>
+      w.errorCorrectionLevel ?? w.design.defaultErrorCorrectionLevel;
+
   @override
   void initState() {
     super.initState();
@@ -88,21 +96,78 @@ class _FlexiQrGeneratorState extends State<FlexiQrGenerator> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolveLogo();
+  }
+
+  @override
   void didUpdateWidget(FlexiQrGenerator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data ||
-        oldWidget.errorCorrectionLevel != widget.errorCorrectionLevel ||
+        _levelOf(oldWidget) != _levelOf(widget) ||
         oldWidget.version != widget.version ||
         oldWidget.encoder != widget.encoder) {
       _encode();
     }
+    if (oldWidget.design.logo?.image != widget.design.logo?.image) {
+      _resolveLogo();
+    }
+  }
+
+  @override
+  void dispose() {
+    _stopListening();
+    _logoInfo?.dispose();
+    super.dispose();
+  }
+
+  void _resolveLogo() {
+    final provider = widget.design.logo?.image;
+    if (provider == null) {
+      _stopListening();
+      _setLogo(null);
+      return;
+    }
+    final stream = provider.resolve(createLocalImageConfiguration(context));
+    if (stream.key == _logoStream?.key) return;
+    _stopListening();
+    _setLogo(null);
+    _logoListener = ImageStreamListener(
+      (info, _) {
+        if (mounted) setState(() => _setLogo(info));
+      },
+      onError: (error, stackTrace) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: error,
+            stack: stackTrace,
+            library: 'flexi_qr_kit',
+            context: ErrorDescription('while loading the QR logo image'),
+          ),
+        );
+      },
+    );
+    _logoStream = stream..addListener(_logoListener!);
+  }
+
+  void _stopListening() {
+    final listener = _logoListener;
+    if (listener != null) _logoStream?.removeListener(listener);
+    _logoStream = null;
+    _logoListener = null;
+  }
+
+  void _setLogo(ImageInfo? info) {
+    _logoInfo?.dispose();
+    _logoInfo = info;
   }
 
   void _encode() {
     try {
       _matrix = widget.encoder.encode(
         widget.data,
-        errorCorrectionLevel: widget.errorCorrectionLevel,
+        errorCorrectionLevel: _levelOf(widget),
         version: widget.version,
       );
       _error = null;
@@ -123,7 +188,11 @@ class _FlexiQrGeneratorState extends State<FlexiQrGenerator> {
       return builder(context, error);
     }
 
-    final painter = FlexiQrPainter(matrix: _matrix!, design: widget.design);
+    final painter = FlexiQrPainter(
+      matrix: _matrix!,
+      design: widget.design,
+      logoImage: _logoInfo?.image,
+    );
     Widget square(double side) => SizedBox.square(
       dimension: side,
       child: CustomPaint(painter: painter),
