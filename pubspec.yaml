@@ -3,6 +3,22 @@ description: "Highly customizable QR code generator for Flutter with per-corner 
 version: 0.1.0
 homepage:
 
+screenshots:
+  - description: "Independent radius for each corner of every module"
+    path: doc/screenshots/mixed_corners.png
+  - description: "Smart corners: neighbors merge, with concave fillets"
+    path: doc/screenshots/smooth.png
+  - description: "Each finder pattern styled independently"
+    path: doc/screenshots/finder_per_position.png
+  - description: "Gradient across the whole code"
+    path: doc/screenshots/gradient.png
+  - description: "Center logo on a rounded container"
+    path: doc/screenshots/logo_badge.png
+  - description: "Custom gradient background with rounded corners"
+    path: doc/screenshots/gradient_background.png
+  - description: "Scanner overlay with independent frame corner radii"
+    path: doc/screenshots/overlay_asymmetric.png
+
 environment:
   sdk: ^3.9.0
   flutter: ">=3.35.0"

@@ -37,6 +37,105 @@ a visual effect.
   UTF-8 support for any Unicode text, including Arabic and emoji.
 - Encoding and rendering are separate: the matrix is immutable and read-only.
 
+## Screenshots
+
+Rendered by the package from the [example app](example/) gallery. Codes marked
+⚠️ or ❌ fail validation on purpose, to show what `QrValidator` catches.
+
+### Basics
+
+<table>
+  <tr>
+    <td align="center"><img src="doc/screenshots/classic.png" width="160" alt="Classic"><br><sub>Classic</sub></td>
+    <td align="center"><img src="doc/screenshots/mixed_corners.png" width="160" alt="Mixed corners"><br><sub>Mixed corners</sub></td>
+    <td align="center"><img src="doc/screenshots/unicode_payload.png" width="160" alt="Unicode payload"><br><sub>Unicode payload</sub></td>
+  </tr>
+</table>
+
+### Shapes
+
+<table>
+  <tr>
+    <td align="center"><img src="doc/screenshots/rounded.png" width="160" alt="Rounded"><br><sub>Rounded</sub></td>
+    <td align="center"><img src="doc/screenshots/dots.png" width="160" alt="Dots"><br><sub>Dots</sub></td>
+    <td align="center"><img src="doc/screenshots/circle.png" width="160" alt="Circle"><br><sub>Circle</sub></td>
+    <td align="center"><img src="doc/screenshots/diamond.png" width="160" alt="Diamond"><br><sub>Diamond</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="doc/screenshots/custom_renderer.png" width="160" alt="Custom renderer"><br><sub>Custom renderer</sub></td>
+  </tr>
+</table>
+
+### Smart corners
+
+<table>
+  <tr>
+    <td align="center"><img src="doc/screenshots/connected.png" width="160" alt="Connected"><br><sub>Connected</sub></td>
+    <td align="center"><img src="doc/screenshots/smooth.png" width="160" alt="Smooth"><br><sub>Smooth</sub></td>
+    <td align="center"><img src="doc/screenshots/smart_custom_radius.png" width="160" alt="Smart custom radius"><br><sub>Smart custom radius</sub></td>
+    <td align="center"><img src="doc/screenshots/custom_corner_engine.png" width="160" alt="Custom corner engine"><br><sub>Custom corner engine</sub></td>
+  </tr>
+</table>
+
+### Color & effects
+
+<table>
+  <tr>
+    <td align="center"><img src="doc/screenshots/gradient.png" width="160" alt="Gradient"><br><sub>Gradient</sub></td>
+    <td align="center"><img src="doc/screenshots/scale_and_spacing.png" width="160" alt="Scale and spacing"><br><sub>Scale and spacing</sub></td>
+    <td align="center"><img src="doc/screenshots/opacity.png" width="160" alt="Opacity"><br><sub>Opacity</sub></td>
+    <td align="center"><img src="doc/screenshots/rotated_modules.png" width="160" alt="Rotated modules ⚠️"><br><sub>Rotated modules ⚠️</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="doc/screenshots/style_per_module.png" width="160" alt="Style per module"><br><sub>Style per module</sub></td>
+  </tr>
+</table>
+
+### Finders
+
+<table>
+  <tr>
+    <td align="center"><img src="doc/screenshots/rounded_finders.png" width="160" alt="Rounded finders"><br><sub>Rounded finders</sub></td>
+    <td align="center"><img src="doc/screenshots/circle_finders.png" width="160" alt="Circle finders"><br><sub>Circle finders</sub></td>
+    <td align="center"><img src="doc/screenshots/finder_per_position.png" width="160" alt="Finder per position"><br><sub>Finder per position</sub></td>
+    <td align="center"><img src="doc/screenshots/finder_gradient_and_separator.png" width="160" alt="Finder gradient and separator"><br><sub>Finder gradient and separator</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="doc/screenshots/finders_as_modules.png" width="160" alt="Finders as modules"><br><sub>Finders as modules</sub></td>
+  </tr>
+</table>
+
+### Background & logo
+
+<table>
+  <tr>
+    <td align="center"><img src="doc/screenshots/gradient_background.png" width="160" alt="Gradient background"><br><sub>Gradient background</sub></td>
+    <td align="center"><img src="doc/screenshots/center_logo.png" width="160" alt="Center logo"><br><sub>Center logo</sub></td>
+    <td align="center"><img src="doc/screenshots/logo_badge.png" width="160" alt="Logo badge"><br><sub>Logo badge</sub></td>
+    <td align="center"><img src="doc/screenshots/asymmetric_finder_with_logo.png" width="160" alt="Asymmetric finder with logo"><br><sub>Asymmetric finder with logo</sub></td>
+  </tr>
+</table>
+
+### Validation
+
+<table>
+  <tr>
+    <td align="center"><img src="doc/screenshots/low_contrast.png" width="160" alt="Low contrast ❌"><br><sub>Low contrast ❌</sub></td>
+    <td align="center"><img src="doc/screenshots/no_quiet_zone.png" width="160" alt="No quiet zone ⚠️"><br><sub>No quiet zone ⚠️</sub></td>
+  </tr>
+</table>
+
+### Scanner overlays
+
+<table>
+  <tr>
+    <td align="center"><img src="doc/screenshots/overlay_brackets.png" width="160" alt="Brackets"><br><sub>Brackets</sub></td>
+    <td align="center"><img src="doc/screenshots/overlay_asymmetric.png" width="160" alt="Asymmetric radii"><br><sub>Asymmetric radii</sub></td>
+    <td align="center"><img src="doc/screenshots/overlay_twoCorners.png" width="160" alt="Two corners"><br><sub>Two corners</sub></td>
+    <td align="center"><img src="doc/screenshots/overlay_fullBorder.png" width="160" alt="Full border"><br><sub>Full border</sub></td>
+  </tr>
+</table>
+
 ## Installation
 
 ```yaml
