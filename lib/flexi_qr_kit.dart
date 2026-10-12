@@ -2,6 +2,16 @@
 /// radii per module, per-module styling and pluggable renderers.
 library;
 
+export 'package:mobile_scanner/mobile_scanner.dart'
+    show
+        BarcodeFormat,
+        CameraFacing,
+        DetectionSpeed,
+        MobileScannerController,
+        MobileScannerErrorCode,
+        MobileScannerException,
+        TorchState;
+
 export 'src/core/exceptions/flexi_qr_exception.dart';
 export 'src/core/models/qr_corner.dart';
 export 'src/core/models/qr_error_correction_level.dart';
@@ -35,3 +45,7 @@ export 'src/generator/validation/qr_decoder.dart';
 export 'src/generator/validation/qr_validator.dart';
 export 'src/generator/widgets/flexi_qr_generator.dart';
 export 'src/generator/widgets/flexi_qr_painter.dart';
+export 'src/scanner/flexi_qr_scanner.dart';
+export 'src/scanner/qr_scan_result.dart';
+export 'src/scanner/qr_scanner_overlay.dart';
+export 'src/scanner/qr_scanner_overlay_style.dart';

@@ -10,8 +10,8 @@ a visual effect.
 
 > **Status:** early development (`0.1.0`, unreleased). The generator, module
 > rendering (smart corners, finder styling, backgrounds, center logo),
-> readability validation and PNG export are ready. The scanner is on the
-> [roadmap](#roadmap).
+> readability validation, PNG export and the scanner are ready. See the
+> [example app](example/) for every feature in action.
 
 ## Features
 
@@ -28,6 +28,8 @@ a visual effect.
 - Readability validation: renders the code, decodes it with an independent
   decoder (ZXing) and checks quiet zone, contrast, logo coverage and module size.
 - PNG export through the same pipeline as the preview, validated before export.
+- Camera scanner with a customizable overlay: scan window size and position,
+  dim color, and a frame with independent corner radii and per-corner brackets.
 - Per-module styling through a callback, with full module metadata: position,
   type, dark/light state, the eight neighbors and protection status.
 - Pluggable `QrModuleRenderer` for your own path-based shapes.
@@ -429,10 +431,69 @@ exports and reports the issues in `export.validation`.
 
 Use `QrExporter.renderImage` to get a `ui.Image` instead of PNG bytes.
 
+## Scanner
+
+```dart
+FlexiQrScanner(
+  onDetect: (result) => print(result.value),
+  overlayStyle: const QrScannerOverlayStyle(
+    windowSize: Size(260, 260),
+    frame: QrScannerFrameStyle(
+      color: Colors.greenAccent,
+      strokeWidth: 6,
+      cornerLength: 40,
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(32),
+        bottomRight: Radius.circular(32),
+      ),
+    ),
+  ),
+)
+```
+
+The scanner reads QR codes only, and by default only inside the scan window.
+Each value is reported once, then ignored until it has been out of view for
+`duplicateCooldown` (2 seconds; `Duration.zero` reports every frame).
+`result.rawBytes` holds the payload bytes when the platform reports them.
+
+The overlay dims the preview outside the window and frames it. Each window
+corner has its own radius, and `QrScannerFrameStyle.corners` picks which
+corner brackets are drawn:
+
+```dart
+const QrScannerFrameStyle(
+  corners: {QrCorner.topLeft, QrCorner.bottomRight},
+  borderRadius: BorderRadius.zero,
+);
+const QrScannerFrameStyle(fullBorder: true); // outline the whole window
+```
+
+Set `overlayStyle: null` for no overlay, or put `QrScannerOverlay` over your
+own camera preview. Pass a `MobileScannerController` to control the torch,
+switch cameras or pause scanning; the scanner disposes only controllers it
+created.
+
+```dart
+final controller = MobileScannerController(formats: [BarcodeFormat.qrCode]);
+
+FlexiQrScanner(controller: controller, onDetect: handleResult);
+controller.toggleTorch();
+```
+
+The scanner is built on
+[`mobile_scanner`](https://pub.dev/packages/mobile_scanner). Add the camera
+permission your platforms require, as its documentation describes: for
+example `NSCameraUsageDescription` in `ios/Runner/Info.plist`. When the camera
+cannot start, for example without permission, `errorBuilder` is shown.
+
+## Example
+
+The [example app](example/) has a gallery of every feature, a live designer
+with validation and PNG export, and a scanner with overlay presets.
+
 ## Roadmap
 
-- Customizable scanner based on `mobile_scanner`.
-- Example application.
+- Continuous integration and the first pub.dev release.
 
 ## License
 

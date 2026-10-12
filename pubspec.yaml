@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  mobile_scanner: ^7.4.2
   qr: ^3.0.2
   zxing2: ^0.2.4
 

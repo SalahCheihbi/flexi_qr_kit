@@ -185,6 +185,43 @@ void main() {
     );
   });
 
+  test('README scanner snippets', () {
+    final scanner = FlexiQrScanner(
+      onDetect: (result) => result.value,
+      overlayStyle: const QrScannerOverlayStyle(
+        windowSize: Size(260, 260),
+        frame: QrScannerFrameStyle(
+          color: Color(0xFF69F0AE),
+          strokeWidth: 6,
+          cornerLength: 40,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            bottomRight: Radius.circular(32),
+          ),
+        ),
+      ),
+    );
+    expect(scanner.restrictToScanWindow, isTrue);
+    expect(scanner.duplicateCooldown, const Duration(seconds: 2));
+
+    const brackets = QrScannerFrameStyle(
+      corners: {QrCorner.topLeft, QrCorner.bottomRight},
+      borderRadius: BorderRadius.zero,
+    );
+    expect(brackets.corners, hasLength(2));
+    expect(const QrScannerFrameStyle(fullBorder: true).fullBorder, isTrue);
+
+    final controller = MobileScannerController(
+      formats: [BarcodeFormat.qrCode],
+      autoStart: false,
+    );
+    addTearDown(controller.dispose);
+    expect(
+      FlexiQrScanner(controller: controller, onDetect: (_) {}).controller,
+      controller,
+    );
+  });
+
   test('README snippets compile and behave as documented', () {
     const gradient = QrDesign(
       moduleStyle: QrModuleStyle(
