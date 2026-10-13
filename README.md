@@ -1,5 +1,10 @@
 # flexi_qr_kit
 
+[![pub package](https://img.shields.io/pub/v/flexi_qr_kit.svg)](https://pub.dev/packages/flexi_qr_kit)
+[![pub points](https://img.shields.io/pub/points/flexi_qr_kit)](https://pub.dev/packages/flexi_qr_kit/score)
+[![CI](https://github.com/SalahCheihbi/flexi_qr_kit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalahCheihbi/flexi_qr_kit/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A fully customizable QR code generator for Flutter, with precise control over
 every corner of every module.
 
@@ -8,7 +13,7 @@ you set each of the four corners of a module independently: for example, three
 rounded corners and one sharp corner. It never changes the encoded data to get
 a visual effect.
 
-> **Status:** early development (`0.1.0`, unreleased). The generator, module
+> **Status:** first release (`0.1.0`). The generator, module
 > rendering (smart corners, finder styling, backgrounds, center logo),
 > readability validation, PNG export and the scanner are ready. See the
 > [example app](example/) for every feature in action.
