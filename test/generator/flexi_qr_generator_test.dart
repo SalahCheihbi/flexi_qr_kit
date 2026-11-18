@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flexi_qr_kit/flexi_qr_kit.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _CountingEncoder implements QrEncoder {
@@ -88,7 +88,7 @@ void main() {
 
     testWidgets('re-encodes only when encoding inputs change', (tester) async {
       final encoder = _CountingEncoder();
-      Widget build(String data, {Color bg = Colors.white}) => Center(
+      Widget build(String data, {Color bg = const Color(0xFFFFFFFF)}) => Center(
         child: FlexiQrGenerator(
           data: data,
           size: 100,
@@ -99,7 +99,7 @@ void main() {
 
       await tester.pumpWidget(_app(build('a')));
       expect(encoder.calls, 1);
-      await tester.pumpWidget(_app(build('a', bg: Colors.yellow)));
+      await tester.pumpWidget(_app(build('a', bg: Color(0xFFFFEB3B))));
       expect(encoder.calls, 1, reason: 'design changes do not re-encode');
       await tester.pumpWidget(_app(build('b')));
       expect(encoder.calls, 2);

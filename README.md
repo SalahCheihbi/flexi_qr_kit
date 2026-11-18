@@ -148,7 +148,7 @@ dependencies:
   flexi_qr_kit: ^0.1.0
 ```
 
-Requires Flutter 3.35 or later and Dart 3.9 or later.
+Requires Flutter 3.35 or later and Dart 3.9 or later. Tested up to Flutter 3.50.
 
 ```dart
 import 'package:flexi_qr_kit/flexi_qr_kit.dart'; // generator, validation, export

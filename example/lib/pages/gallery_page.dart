@@ -1,5 +1,5 @@
 import 'package:flexi_qr_kit/flexi_qr_kit.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../showcases.dart';
 import '../widgets/export_dialog.dart';
