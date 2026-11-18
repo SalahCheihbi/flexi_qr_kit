@@ -1,5 +1,5 @@
 import 'package:flexi_qr_kit/scanner.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 /// Overlay looks offered by the scanner page.

@@ -1,7 +1,7 @@
 import 'package:example/designer_config.dart';
 import 'package:example/pages/designer_page.dart';
 import 'package:flexi_qr_kit/flexi_qr_kit.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers.dart';

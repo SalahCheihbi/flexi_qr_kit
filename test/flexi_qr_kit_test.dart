@@ -1,6 +1,6 @@
 import 'package:flexi_qr_kit/flexi_qr_kit.dart';
 import 'package:flexi_qr_kit/scanner.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class StarRenderer extends QrModuleRenderer {
