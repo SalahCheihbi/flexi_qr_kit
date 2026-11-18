@@ -1,3 +1,11 @@
+## 0.1.1
+
+### Changed
+
+- Verified compatibility with Flutter 3.50 / Dart 3.14; CI now runs on Flutter 3.50.0.
+- Package tests no longer import the deprecated `package:flutter/material.dart`.
+- Example app migrated to `package:material_ui` and its goldens regenerated for the 3.50 engine.
+
 ## 0.1.0
 
 Initial release.

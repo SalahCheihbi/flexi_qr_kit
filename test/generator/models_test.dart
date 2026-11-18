@@ -1,5 +1,5 @@
 import 'package:flexi_qr_kit/flexi_qr_kit.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -96,10 +96,10 @@ void main() {
 
     test('copyWith replaces only given fields', () {
       const s = QrModuleStyle(shape: QrModuleShape.dots, scale: 0.8);
-      final c = s.copyWith(color: Colors.red);
+      final c = s.copyWith(color: Color(0xFFF44336));
       expect(c.shape, QrModuleShape.dots);
       expect(c.scale, 0.8);
-      expect(c.color, Colors.red);
+      expect(c.color, Color(0xFFF44336));
     });
 
     test('value equality (used to batch identical styles)', () {

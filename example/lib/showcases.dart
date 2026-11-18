@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flexi_qr_kit/flexi_qr_kit.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// What validating a showcase is expected to report.
 enum ShowcaseOutcome {

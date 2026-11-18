@@ -12,7 +12,7 @@ import 'package:example/pages/scanner_page.dart';
 import 'package:example/showcases.dart';
 import 'package:flexi_qr_kit/flexi_qr_kit.dart';
 import 'package:flexi_qr_kit/scanner.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
